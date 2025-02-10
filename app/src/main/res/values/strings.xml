@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="app_name">WorkClock</string>
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Senha</string>
+    <string name="login_button">Login</string>
+    <string name="need_help">Precisa de ajuda?</string>
+    <string name="create_account">Crie uma conta</string>
+
+    <string name="botao_entrada">Entrada</string>
+    <string name="botao_pausa">Pausa</string>
+    <string name="botao_retorno">Retorno</string>
+    <string name="botao_saida">Saída</string>
+
+    <string-array name="itens_menu">
+        <item>Perfil</item>
+        <item>Configurações</item>
+        <item>Notificações</item>
+        <item>Sobre</item>
+        <item>Sair</item>
+    </string-array>
+
+</resources>

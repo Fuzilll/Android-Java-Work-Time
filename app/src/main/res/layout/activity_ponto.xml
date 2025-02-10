@@ -1,0 +1,52 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp"
+    android:id="@+id/main"
+    >
+
+    <!-- Área oval para o rosto -->
+    <FrameLayout
+        android:layout_width="150dp"
+        android:layout_height="200dp"
+        android:background="@drawable/oval_background"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+    </FrameLayout>
+
+    <!-- Botão para marcar o ponto -->
+    <Button
+        android:id="@+id/btnMarcarPonto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Marcar Ponto"
+        android:layout_marginTop="32dp"
+        android:backgroundTint="@color/azulclaro"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:padding="16dp"/>
+
+    <TextView
+        android:id="@+id/tvTipoPonto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Tipo da marcação do ponto"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/tvLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Localização: Não disponível"
+        android:textSize="16sp" />
+</LinearLayout>
