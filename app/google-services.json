@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "128543177473",
-    "project_id": "time-6641e",
-    "storage_bucket": "time-6641e.firebasestorage.app"
+    "project_number": "210275905779",
+    "project_id": "timemarkinghr-55cb0",
+    "storage_bucket": "timemarkinghr-55cb0.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:128543177473:android:0c6804ca68c2bc00ca3900",
+        "mobilesdk_app_id": "1:210275905779:android:a6338a142a1de6e0c18786",
         "android_client_info": {
           "package_name": "com.example.timemarkinghr"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCA9Ut7BDRGH-xvwwlBBHvofaMjcSEYrnM"
+          "current_key": "AIzaSyAlTBkPd2VaIL7D750uj_yHHzWISD8jszI"
         }
       ],
       "services": {

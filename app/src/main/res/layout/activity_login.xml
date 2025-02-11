@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:inputType="textPassword"
             android:maxLines="1"
-            android:hint="Digite sua senha"/>  <!-- ✅ Correto -->
+            android:hint="Digite sua senha"/>
     </com.google.android.material.textfield.TextInputLayout>
 
 
