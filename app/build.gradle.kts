@@ -52,7 +52,9 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation("com.google.firebase:firebase-firestore:24.0.0")
     implementation("com.google.firebase:firebase-database:20.0.3")
-    implementation("com.google.firebase:firebase-storage:20.0.0")
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+
+    implementation("com.cloudinary:cloudinary-android:3.0.2")
 
     implementation("com.github.bumptech.glide:glide:4.15.1")
 }

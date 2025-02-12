@@ -23,16 +23,17 @@
     </FrameLayout>
 
     <!-- Botão para marcar o ponto -->
+
     <Button
-        android:id="@+id/btnMarcarPonto"
+        android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Marcar Ponto"
         android:layout_marginTop="32dp"
         android:backgroundTint="@color/azulclaro"
+        android:padding="16dp"
+        android:text="Tirar foto"
         android:textColor="@android:color/white"
-        android:textSize="18sp"
-        android:padding="16dp"/>
+        android:textSize="18sp"/>
 
     <TextView
         android:id="@+id/tvTipoPonto"
@@ -49,4 +50,15 @@
         android:layout_marginTop="16dp"
         android:text="Localização: Não disponível"
         android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/btnMarcarPonto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:backgroundTint="@color/azulclaro"
+        android:padding="16dp"
+        android:text="Marcar Ponto"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
 </LinearLayout>
