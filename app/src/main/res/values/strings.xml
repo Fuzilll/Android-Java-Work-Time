@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-    <string name="app_name">WorkClock</string>
+    <string name="app_name">Work Time</string>
     <string name="email_hint">Email</string>
     <string name="password_hint">Senha</string>
     <string name="login_button">Login</string>
@@ -16,9 +16,13 @@
     <string-array name="itens_menu">
         <item>Perfil</item>
         <item>Configurações</item>
+        <item>Registros</item>
         <item>Notificações</item>
         <item>Sobre</item>
         <item>Sair</item>
     </string-array>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

@@ -1,4 +1,4 @@
 package com.example.timemarkinghr.controller;
 
-public class RegistroPontoController {
+public class LogAuditoriaController {
 }

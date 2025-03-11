@@ -1,5 +1,6 @@
 package com.example.timemarkinghr.controller;
 
+
 import com.example.timemarkinghr.data.model.Usuario;
 import com.example.timemarkinghr.data.remote.ApiService;
 import com.example.timemarkinghr.data.remote.RemoteRepository;
@@ -8,14 +9,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class UsuarioController {
+public class LoginController {
 
-    public interface LoginCallback {
-        void onLoginSucesso(Usuario usuario);
-        void onLoginFalha(String mensagem);
-    }
-
-    public void login(String email, String senha, LoginCallback callback) {
+    public void login(String email, String senha) {
         Usuario usuario = new Usuario();
         usuario.setEmail(email);
         usuario.setSenha(senha);
@@ -27,16 +23,16 @@ public class UsuarioController {
             @Override
             public void onResponse(Call<ApiService.LoginResponse> call, Response<ApiService.LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    callback.onLoginSucesso(response.body().usuario);
-
+                    Usuario logado = response.body().usuario;
+                    // Salva no SharedPreferences e navega para tela principal
                 } else {
-                    callback.onLoginFalha("Credenciais inválidas ou erro no servidor.");
+                    // Mostra erro no login
                 }
             }
 
             @Override
             public void onFailure(Call<ApiService.LoginResponse> call, Throwable t) {
-                callback.onLoginFalha("Erro de conexão: " + t.getMessage());
+                // Trata erro de rede (timeout, etc.)
             }
         });
     }
