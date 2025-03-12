@@ -8,6 +8,8 @@ import com.example.timemarkinghr.data.model.Usuario;
 public class SessaoManager {
     private static final String PREF_NAME = "Sessao";
     private static final String TOKEN_KEY = "token";
+    private static final String NOME_USER = "nome";
+    private static final String EMAIL_USER = "email";
     private static final String KEY_ID = "idUsuario";
 
     // Salva o token e ID do usuário no SharedPreferences
@@ -16,8 +18,23 @@ public class SessaoManager {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(TOKEN_KEY, token);
         editor.putInt(KEY_ID, usuario.getId());
+
+        editor.putString(NOME_USER, usuario.getNome());
+        editor.putString(EMAIL_USER, usuario.getEmail());
         editor.apply();
     }
+
+
+    //em teste
+    public static String obterNomeUsuario(Context context){
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        return prefs.getString(NOME_USER, "nome");
+    }
+    public static String obterEmailUsuario(Context context){
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        return prefs.getString(EMAIL_USER, "email");
+    }
+
 
     // Obtém o token armazenado
     public static String obterToken(Context context) {

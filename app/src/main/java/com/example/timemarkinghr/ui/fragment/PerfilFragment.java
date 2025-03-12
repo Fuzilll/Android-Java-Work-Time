@@ -11,6 +11,9 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import com.example.timemarkinghr.R;
+import com.example.timemarkinghr.data.remote.ApiService;
+import com.example.timemarkinghr.data.remote.RemoteRepository;
+import com.example.timemarkinghr.utils.SessaoManager;
 
 /**
  * A simple {@link Fragment} subclass for displaying user profile.
@@ -56,9 +59,6 @@ public class PerfilFragment extends Fragment {
         // Inflar o layout para este fragment
         View view = inflater.inflate(R.layout.fragment_perfil, container, false);
 
-        // Configurar a Toolbar
-        Toolbar toolbar = view.findViewById(R.id.toolbarPerfil);
-        toolbar.setNavigationOnClickListener(v -> requireActivity().onBackPressed());
 
         // Configurar a imagem de perfil
         ImageView imageView = view.findViewById(R.id.imgPerfil);
@@ -68,10 +68,15 @@ public class PerfilFragment extends Fragment {
         TextView nomeTextView = view.findViewById(R.id.tvNomeUsuario);
         TextView emailTextView = view.findViewById(R.id.tvEmailUsuario);
 
+        //em teste
+        String nome = SessaoManager.obterNomeUsuario(getContext());
+        String email = SessaoManager.obterEmailUsuario(getContext());
+
         // Preencher com dados de exemplo (podem vir do banco de dados ou da API)
-        nomeTextView.setText("João Silva");
-        emailTextView.setText("joao.silva@exemplo.com");
+        nomeTextView.setText(nome);
+        emailTextView.setText(email);
 
         return view;
     }
+
 }

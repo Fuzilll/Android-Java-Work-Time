@@ -6,26 +6,32 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 
 import com.example.timemarkinghr.R;
 import com.example.timemarkinghr.ui.fragment.PerfilFragment;
+import com.example.timemarkinghr.ui.fragment.HistoricoFragment;
+import com.example.timemarkinghr.ui.fragment.RegistroPontoFragment;
 import com.example.timemarkinghr.utils.SessaoManager;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity {
-    private Button btnEntrada , btnPausa;
-
+    private Button btnEntrada, btnPausa, btnRetornoDaPausa, btnSaida;
+    private TextView tvTitulo;
     private ImageButton btnAbrirMenu;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
+    private boolean isFragmentOpen = false; // Flag para indicar se há um fragmento aberto
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,15 +47,20 @@ public class MainActivity extends AppCompatActivity {
         });
         inicializarComponentes();
         configurarListeners();
-        btnPausa = findViewById(R.id.botaoPausa);
-        btnPausa.setOnClickListener(new View.OnClickListener() {
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
-            public void onClick(View v) {
-                abrirTela(HistoricoActivity.class, "Registros");
+            public void handleOnBackPressed() {
+                if (isFragmentOpen) {
+                    getSupportFragmentManager().popBackStack();
+                    isFragmentOpen = false;
+                    exibirComponentes(true); // Reexibe os botões ao sair do fragmento
+                } else {
+                    finish(); // Fecha a activity se não houver fragmentos
+                }
             }
         });
     }
-
 
     @Override
     protected void onResume() {
@@ -60,12 +71,15 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(this, LoginActivity.class));
             finish();
         }
-
     }
 
     private void inicializarComponentes() {
         btnEntrada = findViewById(R.id.botaoEntrada);
+        btnPausa = findViewById(R.id.botaoPausa);
+        btnRetornoDaPausa = findViewById(R.id.botaoRetorno);
+        btnSaida = findViewById(R.id.botaoSaida);
         btnAbrirMenu = findViewById(R.id.btn_abrir_menu);
+        tvTitulo = findViewById(R.id.tvTitulo);
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
 
@@ -76,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void configurarListeners() {
         if (btnEntrada != null) {
-            btnEntrada.setOnClickListener(v -> startActivity(new Intent(this, RegistroPontoActivity.class)));
+            btnEntrada.setOnClickListener(v -> abrirFragment(new RegistroPontoFragment()));
         } else {
             Log.e("Erro", "Botão de entrada não encontrado!");
         }
@@ -101,11 +115,11 @@ public class MainActivity extends AppCompatActivity {
                 if (itemId == R.id.nav_home) {
                     abrirTela(MainActivity.class, "Início");
                 } else if (itemId == R.id.nav_perfil) {
-                    abrirTela(PerfilFragment.class, "Perfil");
+                    abrirFragment(new PerfilFragment());
                 } else if (itemId == R.id.nav_configuracoes) {
                     abrirTela(ConfiguracoesActivity.class, "Configurações");
                 } else if (itemId == R.id.nav_historico) {
-                    abrirTela(HistoricoActivity.class, "Registros");
+                    abrirFragment(new HistoricoFragment());
                 } else if (itemId == R.id.nav_sair) {
                     realizarLogout();
                 } else {
@@ -119,24 +133,35 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Novo método para logout completo
     private void realizarLogout() {
         Toast.makeText(this, "Saindo...", Toast.LENGTH_SHORT).show();
-
-        // Limpa sessão
         SessaoManager.logout(this);
-
-        // Volta para a tela de login e remove MainActivity da pilha
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-
-        // Finaliza essa activity
         finish();
     }
 
+    private void abrirFragment(Fragment fragment) {
+        exibirComponentes(false); // Esconde os componentes
+        isFragmentOpen = true;
+        getSupportFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit();
+    }
 
-    // Método para abrir novas telas
+    private void exibirComponentes(boolean exibir) {
+        int visibilidade = exibir ? View.VISIBLE : View.GONE;
+        if (btnEntrada != null) btnEntrada.setVisibility(visibilidade);
+        if (btnPausa != null) btnPausa.setVisibility(visibilidade);
+        if (tvTitulo != null) tvTitulo.setVisibility(visibilidade);
+        if (btnRetornoDaPausa != null) btnRetornoDaPausa.setVisibility(visibilidade);
+        if (btnSaida != null) btnSaida.setVisibility(visibilidade);
+    }
+
     private void abrirTela(Class<?> activity, String mensagem) {
         Toast.makeText(this, mensagem, Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, activity);

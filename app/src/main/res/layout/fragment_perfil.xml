@@ -7,40 +7,15 @@
     android:layout_height="match_parent"
     tools:context=".ui.fragment.PerfilFragment">
 
-    <!-- AppBarLayout com Toolbar -->
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarPerfil"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbarPerfil"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:title="Perfil"
-            android:titleTextColor="@color/black"
-            android:navigationIcon="@drawable/ic_voltar">
-            <ImageButton
-                android:id="@+id/btnVoltar"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="@color/white"
-                android:contentDescription="Voltar"
-                android:src="@drawable/ic_voltar" />
-        </androidx.appcompat.widget.Toolbar>
-
-    </com.google.android.material.appbar.AppBarLayout>
-
     <!-- Imagem do perfil -->
     <ImageView
         android:id="@+id/imgPerfil"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:src="@drawable/ic_perfil"
-        android:layout_below="@id/appBarPerfil"
+        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="40dp"/>
+        android:layout_marginTop="70dp"
+        android:src="@drawable/ic_perfil" />
 
     <!-- Nome do usuário -->
     <TextView
@@ -65,5 +40,15 @@
         android:layout_below="@id/tvNomeUsuario"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:id="@+id/cop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvEmailUsuario"
+        android:layout_marginTop="300dp"
+        android:layout_alignStart="@id/tvEmailUsuario"
+        android:textColor="@color/black"
+        android:text="© Work Time"/>
 
 </RelativeLayout>
