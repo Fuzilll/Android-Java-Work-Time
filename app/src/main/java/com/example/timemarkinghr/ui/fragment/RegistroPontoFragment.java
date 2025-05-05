@@ -19,28 +19,25 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.timemarkinghr.R;
 import com.example.timemarkinghr.controller.LocalizacaoService;
+import com.example.timemarkinghr.controller.RegistroPontoController;
 import com.example.timemarkinghr.data.model.RegistroPonto;
-import com.example.timemarkinghr.data.remote.ApiService;
-import com.example.timemarkinghr.data.remote.RemoteRepository;
+import com.example.timemarkinghr.data.model.Usuario;
 import com.example.timemarkinghr.utils.NetworkUtils;
+import com.example.timemarkinghr.utils.SessaoManager;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
+import com.google.android.gms.tasks.Task;
 
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link RegistroPontoFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class RegistroPontoFragment extends Fragment {
 
     private ImageView imgFoto;
@@ -48,60 +45,54 @@ public class RegistroPontoFragment extends Fragment {
     private Button btnCapturarFoto, btnRegistrarPonto;
     private Bitmap fotoBitmap;
     private FusedLocationProviderClient fusedLocationClient;
-    private double latitude, longitude;
-    private ApiService apiService;
-    private LocalizacaoService localizacaoService;
+    private double latitude = 0.0;
+    private double longitude = 0.0;
+    private RegistroPontoController registroPontoController;
+    private Usuario usuario;
+    private boolean localizacaoDisponivel = false;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public RegistroPontoFragment() {
-        // Required empty public constructor
-    }
+    // Launchers para solicitação de permissões e atividades
     private final ActivityResultLauncher<Intent> cameraLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == getActivity().RESULT_OK && result.getData() != null) {
+                if (result.getResultCode() == requireActivity().RESULT_OK && result.getData() != null) {
                     fotoBitmap = (Bitmap) result.getData().getExtras().get("data");
                     imgFoto.setImageBitmap(fotoBitmap);
+                    btnRegistrarPonto.setEnabled(true);
                 }
             });
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment RegistroPontoFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static RegistroPontoFragment newInstance(String param1, String param2) {
-        RegistroPontoFragment fragment = new RegistroPontoFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    // Permissão concedida - obtém localização
+                    obterLocalizacaoAtual();
+                } else {
+                    // Permissão negada - atualiza UI
+                    txtLocalizacao.setText("Localização desativada - ative nas configurações");
+                    localizacaoDisponivel = false;
+                    btnRegistrarPonto.setEnabled(false);
+                    Toast.makeText(requireContext(),
+                            "Sem permissão de localização não é possível registrar ponto",
+                            Toast.LENGTH_LONG).show();
+                }
+            });
+
+    public static RegistroPontoFragment newInstance() {
+        return new RegistroPontoFragment();
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        registroPontoController = new RegistroPontoController(requireContext());
+        usuario = SessaoManager.getUsuario(requireContext());
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
     }
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_registro_ponto, container, false);
 
         imgFoto = view.findViewById(R.id.imgFoto);
@@ -109,80 +100,147 @@ public class RegistroPontoFragment extends Fragment {
         btnCapturarFoto = view.findViewById(R.id.btnCapturarFoto);
         btnRegistrarPonto = view.findViewById(R.id.btnRegistrarPonto);
 
-        apiService = RemoteRepository.getApiService();
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
-        localizacaoService = new LocalizacaoService(requireContext());
+        btnRegistrarPonto.setEnabled(false);
 
-        btnCapturarFoto.setOnClickListener(v -> abrirCamera());
+        btnCapturarFoto.setOnClickListener(v -> verificarPermissaoCamera());
         btnRegistrarPonto.setOnClickListener(v -> registrarPonto());
 
-        solicitarPermissaoLocalizacao();
+        verificarPermissaoLocalizacao();
         return view;
+    }
+
+    private void verificarPermissaoLocalizacao() {
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            obterLocalizacaoAtual();
+        } else {
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+    }
+
+
+    private void verificarPermissaoCamera() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+            abrirCamera();
+        } else {
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA);
+        }
+    }
+
+    private void obterLocalizacaoAtual() {
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            LocalizacaoService localizacaoService = new LocalizacaoService(requireContext());
+
+            localizacaoService.obterLocalizacao(
+                    new LocalizacaoService.LocalizacaoCallback() {
+                        @Override
+                        public void onSuccess(double latitude, double longitude, String endereco) {
+                            requireActivity().runOnUiThread(() -> {
+                                RegistroPontoFragment.this.latitude = latitude;
+                                RegistroPontoFragment.this.longitude = longitude;
+                                localizacaoDisponivel = true;
+                                txtLocalizacao.setText(endereco);
+
+                                if (fotoBitmap != null) {
+                                    btnRegistrarPonto.setEnabled(true);
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onFailure(String errorMessage) {
+                            requireActivity().runOnUiThread(() -> {
+                                txtLocalizacao.setText(errorMessage);
+                                localizacaoDisponivel = false;
+                                btnRegistrarPonto.setEnabled(false);
+
+                                if (!errorMessage.contains("Permissão")) {
+                                    Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    }
+            );
+        } else {
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+            txtLocalizacao.setText("Aguardando permissão de localização...");
+            localizacaoDisponivel = false;
+            btnRegistrarPonto.setEnabled(false);
+        }
     }
 
     private void abrirCamera() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (intent.resolveActivity(requireActivity().getPackageManager()) != null) {
             cameraLauncher.launch(intent);
-        }
-    }
-
-    private void solicitarPermissaoLocalizacao() {
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         } else {
-            obterLocalizacao();
-        }
-    }
-
-    private void obterLocalizacao() {
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
-                if (location != null) {
-                    latitude = location.getLatitude();
-                    longitude = location.getLongitude();
-                    txtLocalizacao.setText(localizacaoService.obterLocalizacao());
-                } else {
-                    txtLocalizacao.setText("Localização: Não disponível");
-                }
-            }).addOnFailureListener(e -> txtLocalizacao.setText("Erro ao obter localização"));
+            Toast.makeText(requireContext(), "Nenhum app de câmera encontrado", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void registrarPonto() {
         if (fotoBitmap == null) {
-            Toast.makeText(getContext(), "Tire uma foto primeiro!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Tire uma foto primeiro!", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        if (!localizacaoDisponivel) {
+            Toast.makeText(requireContext(), "Aguardando localização...", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (!NetworkUtils.isNetworkAvailable(requireContext())) {
-            Toast.makeText(getContext(), "Sem conexão com a internet", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Sem conexão com a internet", Toast.LENGTH_SHORT).show();
             return;
         }
 
         String fotoBase64 = converterBitmapParaBase64(fotoBitmap);
-        RegistroPonto registro = new RegistroPonto("1", latitude, longitude, fotoBase64);
+        String dispositivo = android.os.Build.MANUFACTURER + " " + android.os.Build.MODEL;
 
-//        apiService.registrarPonto(registro).enqueue(new Callback<Void>() {
-//            @Override
-//            public void onResponse(Call<Void> call, Response<Void> response) {
-//                if (response.isSuccessful()) {
-//                    Toast.makeText(getContext(), "Ponto registrado com sucesso!", Toast.LENGTH_SHORT).show();
-//                } else {
-//                    Toast.makeText(getContext(), "Erro ao registrar ponto", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<Void> call, Throwable t) {
-//                Toast.makeText(getContext(), "Erro de conexão: " + t.getMessage(), Toast.LENGTH_LONG).show();
-//            }
-//        });
+        RegistroPonto registro = new RegistroPonto(
+                usuario.getId(),
+                determinarTipoRegistro(),
+                latitude,
+                longitude,
+                fotoBase64,
+                dispositivo
+        );
+
+        registroPontoController.registrarPonto(registro, new RegistroPontoController.RegistroCallback() {
+            @Override
+            public void onSuccess() {
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireContext(), "Ponto registrado com sucesso!", Toast.LENGTH_SHORT).show();
+                    resetarFormulario();
+                });
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                requireActivity().runOnUiThread(() ->
+                        Toast.makeText(requireContext(), "Erro: " + errorMessage, Toast.LENGTH_LONG).show());
+            }
+        });
+    }
+
+    private String determinarTipoRegistro() {
+        return "Entrada"; // Temporário
     }
 
     private String converterBitmapParaBase64(Bitmap bitmap) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream);
         byte[] byteArray = byteArrayOutputStream.toByteArray();
         return Base64.encodeToString(byteArray, Base64.DEFAULT);
+    }
+
+    private void resetarFormulario() {
+        fotoBitmap = null;
+        imgFoto.setImageResource(R.drawable.baseline_photo_camera_24);
+        btnRegistrarPonto.setEnabled(false);
+        localizacaoDisponivel = false;
     }
 }

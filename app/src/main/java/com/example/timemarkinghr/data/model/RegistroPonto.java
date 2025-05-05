@@ -3,38 +3,51 @@ package com.example.timemarkinghr.data.model;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-
 public class RegistroPonto {
-    private String userId;
+    private int id_funcionario;
+    private String tipo;
     private double latitude;
     private double longitude;
     private String fotoBase64;
-    private String dataHora;
+    private String dispositivo;
+    private String data_hora;
 
-    public RegistroPonto(String userId, double latitude, double longitude, String fotoBase64) {
-        this.userId = userId;
+    public RegistroPonto(int id_funcionario, String tipo, double latitude, double longitude, String fotoBase64, String dispositivo) {
+        this.id_funcionario = id_funcionario;
+        this.tipo = tipo;
         this.latitude = latitude;
         this.longitude = longitude;
         this.fotoBase64 = fotoBase64;
+        this.dispositivo = dispositivo;
+        this.data_hora = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
     }
 
-    // Método para obter LocalDateTime formatado
-    public LocalDateTime getDataHoraAsLocalDateTime() {
-        if (dataHora != null) {
-            return LocalDateTime.parse(dataHora, DateTimeFormatter.ISO_DATE_TIME);
-        }
-        return null;
+    // Getters
+    public int getId_funcionario() {
+        return id_funcionario;
     }
-    // Getters e setters
-    public String getUserId() { return userId; }
-    public void setUserId(String userId) { this.userId = userId; }
 
-    public double getLatitude() { return latitude; }
-    public void setLatitude(double latitude) { this.latitude = latitude; }
+    public String getTipo() {
+        return tipo;
+    }
 
-    public double getLongitude() { return longitude; }
-    public void setLongitude(double longitude) { this.longitude = longitude; }
+    public double getLatitude() {
+        return latitude;
+    }
 
-    public String getFotoBase64() { return fotoBase64; }
-    public void setFotoBase64(String fotoBase64) { this.fotoBase64 = fotoBase64; }
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public String getFotoBase64() {
+        return fotoBase64;
+    }
+
+    public String getDispositivo() {
+        return dispositivo;
+    }
+
+    public String getData_hora() {
+        return data_hora;
+    }
 }

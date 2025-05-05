@@ -96,7 +96,7 @@ public class RegistroPontoActivity extends AppCompatActivity {
                 if (location != null) {
                     latitude = location.getLatitude();
                     longitude = location.getLongitude();
-                    txtLocalizacao.setText(localizacaoService.obterLocalizacao());
+              //      txtLocalizacao.setText(localizacaoService.obterLocalizacao());
                 } else {
                     txtLocalizacao.setText("Localização: Não disponível");
                 }
@@ -116,7 +116,7 @@ public class RegistroPontoActivity extends AppCompatActivity {
         }
 
         String fotoBase64 = converterBitmapParaBase64(fotoBitmap);
-        RegistroPonto registro = new RegistroPonto("1", latitude, longitude, fotoBase64);
+  //      RegistroPonto registro = new RegistroPonto("1", latitude, longitude, fotoBase64);
 
 //        apiService.registrarPonto(registro).enqueue(new Callback<Void>() {
 //            @Override

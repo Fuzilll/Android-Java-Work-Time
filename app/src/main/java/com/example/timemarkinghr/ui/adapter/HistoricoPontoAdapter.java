@@ -62,11 +62,11 @@ public class HistoricoPontoAdapter extends RecyclerView.Adapter<HistoricoPontoAd
             tvTipoPonto.setText("Registro de Ponto");
             tvLocalizacao.setText("Lat: " + ponto.getLatitude() + " | Lng: " + ponto.getLongitude());
 
-            if (ponto.getDataHoraAsLocalDateTime() != null) {
-                tvDataHora.setText(DateUtils.formatarParaExibicao(ponto.getDataHoraAsLocalDateTime()));
-            } else {
-                tvDataHora.setText("Data não disponível");
-            }
+//            if (ponto.getDataHoraAsLocalDateTime() != null) {
+//                tvDataHora.setText(DateUtils.formatarParaExibicao(ponto.getDataHoraAsLocalDateTime()));
+//            } else {
+//                tvDataHora.setText("Data não disponível");
+//            }
         }
     }
 }
