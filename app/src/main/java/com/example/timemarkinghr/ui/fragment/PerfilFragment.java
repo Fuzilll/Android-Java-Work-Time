@@ -69,12 +69,12 @@ public class PerfilFragment extends Fragment {
         TextView emailTextView = view.findViewById(R.id.tvEmailUsuario);
 
         //em teste
-        String nome = SessaoManager.obterNomeUsuario(getContext());
-        String email = SessaoManager.obterEmailUsuario(getContext());
+    //    String nome = SessaoManager.obterNomeUsuario(getContext());
+      //  String email = SessaoManager.obterEmailUsuario(getContext());
 
         // Preencher com dados de exemplo (podem vir do banco de dados ou da API)
-        nomeTextView.setText(nome);
-        emailTextView.setText(email);
+     //   nomeTextView.setText(nome);
+      //car  emailTextView.setText(email);
 
         return view;
     }

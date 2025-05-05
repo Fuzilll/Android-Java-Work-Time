@@ -88,7 +88,7 @@ public class HistoricoFragment extends Fragment {
         recyclerViewHistorico = view.findViewById(R.id.recyclerViewHistorico);
         recyclerViewHistorico.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        userId = SessaoManager.obterIdUsuario(requireContext());
+  //      userId = SessaoManager.obterIdUsuario(requireContext());
         if (userId == -1) {
             Toast.makeText(getContext(), "Erro: Usuário não encontrado.", Toast.LENGTH_SHORT).show();
             requireActivity().finish();
@@ -111,28 +111,28 @@ public class HistoricoFragment extends Fragment {
     }
 
     private void carregarDados() {
-        Log.d("HistoricoFragment", "Carregando registros para userId: " + userId);
-
-        Call<List<RegistroPonto>> call = apiService.buscarRegistrosPorUsuario(userId);
-        call.enqueue(new Callback<List<RegistroPonto>>() {
-            @Override
-            public void onResponse(Call<List<RegistroPonto>> call, Response<List<RegistroPonto>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    listaPontos.clear();
-                    listaPontos.addAll(response.body());
-                    adapter.notifyDataSetChanged();
-                    Log.d("HistoricoFragment", "Registros carregados: " + listaPontos.size());
-                } else {
-                    Toast.makeText(getContext(), "Nenhum registro encontrado", Toast.LENGTH_SHORT).show();
-                    Log.e("HistoricoFragment", "Erro na resposta: " + response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<RegistroPonto>> call, Throwable t) {
-                Toast.makeText(getContext(), "Erro ao buscar registros: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e("HistoricoFragment", "Falha ao carregar registros", t);
-            }
-        });
+//        Log.d("HistoricoFragment", "Carregando registros para userId: " + userId);
+//
+//        Call<List<RegistroPonto>> call = apiService.buscarRegistrosPorUsuario(userId);
+//        call.enqueue(new Callback<List<RegistroPonto>>() {
+//            @Override
+//            public void onResponse(Call<List<RegistroPonto>> call, Response<List<RegistroPonto>> response) {
+//                if (response.isSuccessful() && response.body() != null) {
+//                    listaPontos.clear();
+//                    listaPontos.addAll(response.body());
+//                    adapter.notifyDataSetChanged();
+//                    Log.d("HistoricoFragment", "Registros carregados: " + listaPontos.size());
+//                } else {
+//                    Toast.makeText(getContext(), "Nenhum registro encontrado", Toast.LENGTH_SHORT).show();
+//                    Log.e("HistoricoFragment", "Erro na resposta: " + response.message());
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<List<RegistroPonto>> call, Throwable t) {
+//                Toast.makeText(getContext(), "Erro ao buscar registros: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+//                Log.e("HistoricoFragment", "Falha ao carregar registros", t);
+//            }
+//        });
     }
 }

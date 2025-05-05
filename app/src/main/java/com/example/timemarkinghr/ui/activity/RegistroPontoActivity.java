@@ -118,27 +118,27 @@ public class RegistroPontoActivity extends AppCompatActivity {
         String fotoBase64 = converterBitmapParaBase64(fotoBitmap);
         RegistroPonto registro = new RegistroPonto("1", latitude, longitude, fotoBase64);
 
-        apiService.registrarPonto(registro).enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(RegistroPontoActivity.this, "Ponto registrado com sucesso!", Toast.LENGTH_SHORT).show();
-                } else {
-                    // Log detalhado da resposta
-                    try {
-                        String errorBody = response.errorBody().string();
-                        Toast.makeText(RegistroPontoActivity.this, "Erro: " + errorBody, Toast.LENGTH_LONG).show();
-                    } catch (Exception e) {
-                        Toast.makeText(RegistroPontoActivity.this, "Erro desconhecido!", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(RegistroPontoActivity.this, "Erro de conexão: " + t.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
+//        apiService.registrarPonto(registro).enqueue(new Callback<Void>() {
+//            @Override
+//            public void onResponse(Call<Void> call, Response<Void> response) {
+//                if (response.isSuccessful()) {
+//                    Toast.makeText(RegistroPontoActivity.this, "Ponto registrado com sucesso!", Toast.LENGTH_SHORT).show();
+//                } else {
+//                    // Log detalhado da resposta
+//                    try {
+//                        String errorBody = response.errorBody().string();
+//                        Toast.makeText(RegistroPontoActivity.this, "Erro: " + errorBody, Toast.LENGTH_LONG).show();
+//                    } catch (Exception e) {
+//                        Toast.makeText(RegistroPontoActivity.this, "Erro desconhecido!", Toast.LENGTH_SHORT).show();
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<Void> call, Throwable t) {
+//                Toast.makeText(RegistroPontoActivity.this, "Erro de conexão: " + t.getMessage(), Toast.LENGTH_LONG).show();
+//            }
+//        });
 
     }
 

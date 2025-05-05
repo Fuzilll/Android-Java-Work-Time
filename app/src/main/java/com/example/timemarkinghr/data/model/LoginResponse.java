@@ -1,18 +1,19 @@
 package com.example.timemarkinghr.data.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class LoginResponse {
-    private boolean sucess;
+    @SerializedName("token")
     private String token;
-    private String mensagem;
 
-    public boolean isSucess(){
-        return sucess;
-    }
-    public String getToken() {
-        return token;
-    }
+    @SerializedName("usuario")
+    private Usuario usuario;
 
-    public String getMensagem() {
-        return mensagem;
-    }
+    @SerializedName("message")
+    private String message;
+
+    // Getters e Setters
+    public String getToken() { return token; }
+    public Usuario getUsuario() { return usuario; }
+    public String getMessage() { return message; }
 }

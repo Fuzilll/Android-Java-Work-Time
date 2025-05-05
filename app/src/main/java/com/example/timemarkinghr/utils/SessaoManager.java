@@ -4,60 +4,44 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.example.timemarkinghr.data.model.Usuario;
+import com.google.gson.Gson;
 
 public class SessaoManager {
-    private static final String PREF_NAME = "Sessao";
-    private static final String TOKEN_KEY = "token";
-    private static final String NOME_USER = "nome";
-    private static final String EMAIL_USER = "email";
+    private static final String PREF_NAME = "SessaoUsuario";
+    private static final String KEY_TOKEN = "token";
+    private static final String KEY_USUARIO = "usuario";
     private static final String KEY_ID = "idUsuario";
+    private static final String KEY_NIVEL = "nivelUsuario";
 
-    // Salva o token e ID do usuário no SharedPreferences
     public static void salvarSessao(Context context, String token, Usuario usuario) {
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(TOKEN_KEY, token);
-        editor.putInt(KEY_ID, usuario.getId());
 
-        editor.putString(NOME_USER, usuario.getNome());
-        editor.putString(EMAIL_USER, usuario.getEmail());
+        editor.putString(KEY_TOKEN, token);
+        editor.putString(KEY_USUARIO, new Gson().toJson(usuario));
+        editor.putInt(KEY_ID, usuario.getId());
+        editor.putString(KEY_NIVEL, usuario.getNivel());
+
         editor.apply();
     }
 
-
-    //em teste
-    public static String obterNomeUsuario(Context context){
+    public static String getToken(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        return prefs.getString(NOME_USER, "nome");
-    }
-    public static String obterEmailUsuario(Context context){
-        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        return prefs.getString(EMAIL_USER, "email");
+        return prefs.getString(KEY_TOKEN, null);
     }
 
-
-    // Obtém o token armazenado
-    public static String obterToken(Context context) {
+    public static Usuario getUsuario(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        return prefs.getString(TOKEN_KEY, null);
+        String usuarioJson = prefs.getString(KEY_USUARIO, null);
+        return new Gson().fromJson(usuarioJson, Usuario.class);
     }
 
-    // Obtém o ID do usuário armazenado
-    public static int obterIdUsuario(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        return prefs.getInt(KEY_ID, -1); // Retorna -1 se não houver ID salvo
-    }
-
-    // Verifica se o usuário está logado
     public static boolean estaLogado(Context context) {
-        return obterToken(context) != null;
+        return getToken(context) != null;
     }
 
-    // Remove o token e dados do usuário, fazendo logout
     public static void logout(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.clear();  // Limpa tudo da sessão
-        editor.apply();
+        prefs.edit().clear().apply();
     }
 }

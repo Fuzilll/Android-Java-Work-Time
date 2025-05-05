@@ -1,5 +1,8 @@
 package com.example.timemarkinghr.data.model;
 
+/**
+ * Modelo de requisição para autenticação de usuário
+ */
 public class LoginRequest {
     private String email;
     private String senha;
@@ -9,6 +12,7 @@ public class LoginRequest {
         this.senha = senha;
     }
 
+    // Getters e Setters
     public String getEmail() {
         return email;
     }

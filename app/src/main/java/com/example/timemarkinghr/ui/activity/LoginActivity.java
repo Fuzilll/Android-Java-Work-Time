@@ -3,75 +3,119 @@ package com.example.timemarkinghr.ui.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.timemarkinghr.R;
 import com.example.timemarkinghr.controller.UsuarioController;
+import com.example.timemarkinghr.data.model.LoginResponse;
 import com.example.timemarkinghr.data.model.Usuario;
 import com.example.timemarkinghr.utils.SessaoManager;
 
 public class LoginActivity extends AppCompatActivity {
-    private EditText et_email, et_password;
-    private Button btn_login;
+    private static final String TAG = "LoginActivity";
+    private EditText etEmail, etSenha;
+    private Button btnLogin;
+    private UsuarioController usuarioController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
-        // Componentes
-        et_email = findViewById(R.id.et_email);
-        et_password = findViewById(R.id.et_password);
-        btn_login = findViewById(R.id.btn_login);
+        inicializarViews();
+        configurarListeners();
+        usuarioController = new UsuarioController(this);
 
-        btn_login.setOnClickListener(v -> {
-            String email = et_email.getText().toString().trim();
-            String senha = et_password.getText().toString().trim();
+        verificarSessaoAtiva();
+    }
 
-            if (email.isEmpty() || senha.isEmpty()) {
-                Toast.makeText(LoginActivity.this, "Preencha todos os campos", Toast.LENGTH_SHORT).show();
-            } else {
-                realizarLogin(email, senha);
+    private void inicializarViews() {
+        etEmail = findViewById(R.id.et_email);
+        etSenha = findViewById(R.id.et_password);
+        btnLogin = findViewById(R.id.btn_login);
+    }
+
+    private void configurarListeners() {
+        btnLogin.setOnClickListener(v -> validarERealizarLogin());
+    }
+
+    private void verificarSessaoAtiva() {
+        if (SessaoManager.estaLogado(this)) {
+            redirecionarParaMainActivity();
+        }
+    }
+
+    private void validarERealizarLogin() {
+        String email = etEmail.getText().toString().trim();
+        String senha = etSenha.getText().toString().trim();
+
+        if (email.isEmpty() || senha.isEmpty()) {
+            mostrarMensagem("Preencha todos os campos");
+            return;
+        }
+
+        realizarLogin(email, senha);
+    }
+
+    private void realizarLogin(String email, String senha) {
+        btnLogin.setEnabled(false); // Desabilita o botão durante a requisição
+        Log.d(TAG, "Iniciando login para: " + email); // LOG 1 - Início do processo
+
+        usuarioController.realizarLogin(email, senha, new UsuarioController.LoginCallback() {
+            @Override
+            public void onSuccess(LoginResponse response) {
+                runOnUiThread(() -> {
+                    if (response != null && response.getToken() != null) {
+                        salvarSessaoERedirecionar(response);
+                    } else {
+                        Log.e(TAG, "Resposta inválida do servidor");
+                        mostrarMensagem("Erro no login");
+                    }
+                    btnLogin.setEnabled(true);
+                });
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                runOnUiThread(() -> {
+                    String error = errorMessage != null ? errorMessage : "Erro desconhecido";
+                    Log.e(TAG, "Falha no login: " + error);
+                    mostrarMensagem(error);
+                    btnLogin.setEnabled(true);
+                });
             }
         });
     }
 
-    private void realizarLogin(String email, String senha) {
-        UsuarioController usuarioController = new UsuarioController();
-        usuarioController.login(email, senha, new UsuarioController.LoginCallback() {
-            @Override
-            public void onLoginSucesso(Usuario usuario) {
-                Log.d("001", "Login bem-sucedido!");
+    private void salvarSessaoERedirecionar(LoginResponse response) {
+        try {
+            String token = response.getToken();
+            Usuario usuario = response.getUsuario();
 
-                // Salvar sessão do usuário
-                SessaoManager.salvarSessao(LoginActivity.this, "TOKEN_AQUI", usuario);
+            SessaoManager.salvarSessao(LoginActivity.this, token, usuario);
+            Log.d(TAG, "Usuário autenticado: " + usuario.getEmail()); // LOG 3 - Dados do usuário
 
-                Toast.makeText(LoginActivity.this, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Redirecionando para MainActivity..."); // LOG 4 - Antes do redirecionamento
+            redirecionarParaMainActivity();
+        } catch (Exception e) {
+            Log.e(TAG, "Erro ao salvar sessão", e);
+            mostrarMensagem("Erro ao processar login");
+        }
+    }
 
-                // Direcionar para a MainActivity
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
-            }
+    private void redirecionarParaMainActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+    }
 
-            @Override
-            public void onLoginFalha(String mensagem) {
-                Toast.makeText(LoginActivity.this, "Erro: " + mensagem, Toast.LENGTH_SHORT).show();
-            }
-        });
+    private void mostrarMensagem(String mensagem) {
+        Toast.makeText(this, mensagem, Toast.LENGTH_LONG).show();
     }
 }
