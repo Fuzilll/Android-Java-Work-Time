@@ -33,10 +33,7 @@ public interface ApiService {
 
     // Rotas de Registro de Ponto
     @POST("registros/registrar")
-    Call<Void> registrarPonto(
-            @Header("Authorization") String token,
-            @Body RegistroPonto registroPonto
-    );
+    Call<Void> registrarPonto(@Header("Authorization") String authHeader, @Body RegistroPonto registro);
 
     @GET("registros/usuario/{userId}")
     Call<List<RegistroPonto>> buscarRegistrosPorUsuario(

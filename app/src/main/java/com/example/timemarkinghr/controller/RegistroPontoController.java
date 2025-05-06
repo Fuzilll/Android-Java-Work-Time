@@ -54,7 +54,7 @@ public class RegistroPontoController {
         registroMap.put("longitude", registro.getLongitude());
         registroMap.put("dispositivo", registro.getDispositivo());
 
-        Call<Void> call = apiService.registrarPonto(authHeader, (RegistroPonto) registroMap);
+        Call<Void> call = apiService.registrarPonto(authHeader, registro);
 
         call.enqueue(new Callback<Void>() {
             @Override

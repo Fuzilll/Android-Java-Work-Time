@@ -232,7 +232,7 @@ public class RegistroPontoFragment extends Fragment {
                             determinarTipoRegistro(),
                             latitude,
                             longitude,
-                            imageUrl, // Usando a URL do Cloudinary em vez do Base64
+                            imageUrl, // URL já processada pelo Cloudinary
                             android.os.Build.MANUFACTURER + " " + android.os.Build.MODEL
                     );
 
