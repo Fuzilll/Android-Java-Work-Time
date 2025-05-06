@@ -8,16 +8,17 @@ public class RegistroPonto {
     private String tipo;
     private double latitude;
     private double longitude;
-    private String fotoBase64;
+    private String foto; // Agora armazena a URL em vez de Base64
+
     private String dispositivo;
     private String data_hora;
 
-    public RegistroPonto(int id_funcionario, String tipo, double latitude, double longitude, String fotoBase64, String dispositivo) {
+    public RegistroPonto(int id_funcionario, String tipo, double latitude, double longitude, String foto, String dispositivo) {
         this.id_funcionario = id_funcionario;
         this.tipo = tipo;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.fotoBase64 = fotoBase64;
+        this.foto = foto;
         this.dispositivo = dispositivo;
         this.data_hora = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
     }
@@ -40,7 +41,7 @@ public class RegistroPonto {
     }
 
     public String getFotoBase64() {
-        return fotoBase64;
+        return foto;
     }
 
     public String getDispositivo() {

@@ -9,6 +9,9 @@ import com.example.timemarkinghr.data.remote.RemoteRepository;
 import com.example.timemarkinghr.utils.NetworkUtils;
 import com.example.timemarkinghr.utils.SessaoManager;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -40,7 +43,19 @@ public class RegistroPontoController {
             return;
         }
 
-        Call<Void> call = apiService.registrarPonto(token, registro);
+        String authHeader = "Bearer " + token;
+
+        // Criar um mapa com os dados para enviar
+        Map<String, Object> registroMap = new HashMap<>();
+        registroMap.put("id_funcionario", registro.getId_funcionario());
+        registroMap.put("tipo", registro.getTipo());
+        registroMap.put("foto_url", registro.getFotoBase64());
+        registroMap.put("latitude", registro.getLatitude());
+        registroMap.put("longitude", registro.getLongitude());
+        registroMap.put("dispositivo", registro.getDispositivo());
+
+        Call<Void> call = apiService.registrarPonto(authHeader, (RegistroPonto) registroMap);
+
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
@@ -65,5 +80,4 @@ public class RegistroPontoController {
                 callback.onFailure("Falha na comunicação: " + t.getMessage());
             }
         });
-    }
-}
+    }}

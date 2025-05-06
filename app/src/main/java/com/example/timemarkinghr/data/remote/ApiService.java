@@ -32,7 +32,7 @@ public interface ApiService {
     Call<Void> logout(@Header("Authorization") String token);
 
     // Rotas de Registro de Ponto
-    @POST("registros/cadastrar")
+    @POST("registros/registrar")
     Call<Void> registrarPonto(
             @Header("Authorization") String token,
             @Body RegistroPonto registroPonto

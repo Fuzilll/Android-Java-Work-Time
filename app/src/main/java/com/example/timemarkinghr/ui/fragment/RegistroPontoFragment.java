@@ -1,12 +1,14 @@
 package com.example.timemarkinghr.ui.fragment;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +29,7 @@ import com.example.timemarkinghr.controller.LocalizacaoService;
 import com.example.timemarkinghr.controller.RegistroPontoController;
 import com.example.timemarkinghr.data.model.RegistroPonto;
 import com.example.timemarkinghr.data.model.Usuario;
+import com.example.timemarkinghr.utils.CloudinaryService;
 import com.example.timemarkinghr.utils.NetworkUtils;
 import com.example.timemarkinghr.utils.SessaoManager;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -182,50 +185,86 @@ public class RegistroPontoFragment extends Fragment {
     }
 
     private void registrarPonto() {
+        // Verificar se a foto foi tirada
         if (fotoBitmap == null) {
             Toast.makeText(requireContext(), "Tire uma foto primeiro!", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // Verificar se a localização está disponível
         if (!localizacaoDisponivel) {
             Toast.makeText(requireContext(), "Aguardando localização...", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // Verificar se a conexão com a internet está disponível
         if (!NetworkUtils.isNetworkAvailable(requireContext())) {
             Toast.makeText(requireContext(), "Sem conexão com a internet", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String fotoBase64 = converterBitmapParaBase64(fotoBitmap);
-        String dispositivo = android.os.Build.MANUFACTURER + " " + android.os.Build.MODEL;
+        // Verificar se o usuário está logado corretamente
+        if (usuario == null) {
+            Toast.makeText(requireContext(), "Usuário não encontrado ou sessão expirada", Toast.LENGTH_LONG).show();
+            return;
+        }
 
-        RegistroPonto registro = new RegistroPonto(
-                usuario.getId(),
-                determinarTipoRegistro(),
-                latitude,
-                longitude,
-                fotoBase64,
-                dispositivo
-        );
+        // Mostrar progresso
+        ProgressDialog progressDialog = new ProgressDialog(requireContext());
+        progressDialog.setMessage("Enviando foto...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
 
-        registroPontoController.registrarPonto(registro, new RegistroPontoController.RegistroCallback() {
+        // Criar um ID único para a imagem
+        String imagePublicId = "ponto_" + usuario.getId() + "_" + System.currentTimeMillis();
+
+        // Fazer upload da imagem para o Cloudinary
+        CloudinaryService cloudinaryService = new CloudinaryService();
+        cloudinaryService.uploadImage(fotoBitmap, imagePublicId, new CloudinaryService.UploadCallback() {
             @Override
-            public void onSuccess() {
+            public void onSuccess(String imageUrl) {
                 requireActivity().runOnUiThread(() -> {
-                    Toast.makeText(requireContext(), "Ponto registrado com sucesso!", Toast.LENGTH_SHORT).show();
-                    resetarFormulario();
+                    progressDialog.dismiss();
+
+                    // Criar o objeto de registro de ponto com a URL da imagem
+                    RegistroPonto registro = new RegistroPonto(
+                            usuario.getId(),
+                            determinarTipoRegistro(),
+                            latitude,
+                            longitude,
+                            imageUrl, // Usando a URL do Cloudinary em vez do Base64
+                            android.os.Build.MANUFACTURER + " " + android.os.Build.MODEL
+                    );
+
+                    // Chamar o método do controlador para registrar o ponto
+                    registroPontoController.registrarPonto(registro, new RegistroPontoController.RegistroCallback() {
+                        @Override
+                        public void onSuccess() {
+                            requireActivity().runOnUiThread(() -> {
+                                Toast.makeText(requireContext(), "Ponto registrado com sucesso!", Toast.LENGTH_SHORT).show();
+                                resetarFormulario();
+                            });
+                        }
+
+                        @Override
+                        public void onFailure(String errorMessage) {
+                            requireActivity().runOnUiThread(() -> {
+                                Toast.makeText(requireContext(), "Erro: " + errorMessage, Toast.LENGTH_LONG).show();
+                            });
+                        }
+                    });
                 });
             }
 
             @Override
             public void onFailure(String errorMessage) {
-                requireActivity().runOnUiThread(() ->
-                        Toast.makeText(requireContext(), "Erro: " + errorMessage, Toast.LENGTH_LONG).show());
+                requireActivity().runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    Toast.makeText(requireContext(), "Falha ao enviar foto: " + errorMessage, Toast.LENGTH_LONG).show();
+                });
             }
         });
     }
-
     private String determinarTipoRegistro() {
         return "Entrada"; // Temporário
     }
