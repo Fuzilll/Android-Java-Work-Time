@@ -40,10 +40,10 @@ public class RegistroPonto {
         return longitude;
     }
 
-    public String getFotoBase64() {
+    // Na classe RegistroPonto
+    public String getFotoUrl() {
         return foto;
     }
-
     public String getDispositivo() {
         return dispositivo;
     }

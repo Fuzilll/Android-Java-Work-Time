@@ -6,6 +6,7 @@ import com.example.timemarkinghr.data.model.RegistroPonto;
 import com.example.timemarkinghr.data.model.Usuario;
 
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -33,7 +34,7 @@ public interface ApiService {
 
     // Rotas de Registro de Ponto
     @POST("registros/registrar")
-    Call<Void> registrarPonto(@Header("Authorization") String authHeader, @Body RegistroPonto registro);
+    Call<Void> registrarPonto(@Header("Authorization") String authHeader, @Body Map<String, Object> registro);
 
     @GET("registros/usuario/{userId}")
     Call<List<RegistroPonto>> buscarRegistrosPorUsuario(

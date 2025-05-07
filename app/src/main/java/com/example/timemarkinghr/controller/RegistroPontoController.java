@@ -49,12 +49,12 @@ public class RegistroPontoController {
         Map<String, Object> registroMap = new HashMap<>();
         registroMap.put("id_funcionario", registro.getId_funcionario());
         registroMap.put("tipo", registro.getTipo());
-        registroMap.put("foto_url", registro.getFotoBase64());
+        registroMap.put("foto_url", registro.getFotoUrl());
         registroMap.put("latitude", registro.getLatitude());
         registroMap.put("longitude", registro.getLongitude());
         registroMap.put("dispositivo", registro.getDispositivo());
 
-        Call<Void> call = apiService.registrarPonto(authHeader, registro);
+        Call<Void> call = apiService.registrarPonto(authHeader, registroMap);
 
         call.enqueue(new Callback<Void>() {
             @Override
