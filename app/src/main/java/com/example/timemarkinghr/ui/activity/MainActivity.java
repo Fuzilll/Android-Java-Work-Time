@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,7 +27,7 @@ import com.example.timemarkinghr.utils.SessaoManager;
 import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends AppCompatActivity {
-    private Button btnEntrada, btnPausa, btnRetornoDaPausa, btnSaida;
+    private LinearLayout btnEntrada, btnPausa, btnRetornoDaPausa, btnSaida;
     private TextView tvTitulo;
     private ImageButton btnAbrirMenu;
     private DrawerLayout drawerLayout;
@@ -90,7 +91,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void configurarListeners() {
         if (btnEntrada != null) {
-            btnEntrada.setOnClickListener(v -> abrirFragment(new RegistroPontoFragment()));
+            btnEntrada.setOnClickListener(v -> abrirFragmentComTipoPonto("entrada"));
+            btnPausa.setOnClickListener(v -> abrirFragmentComTipoPonto("pausa"));
+            btnRetornoDaPausa.setOnClickListener(v -> abrirFragmentComTipoPonto("retorno"));
+            btnSaida.setOnClickListener(v -> abrirFragmentComTipoPonto("saida"));
         } else {
             Log.e("Erro", "Botão de entrada não encontrado!");
         }
@@ -145,6 +149,24 @@ public class MainActivity extends AppCompatActivity {
     private void abrirFragment(Fragment fragment) {
         exibirComponentes(false); // Esconde os componentes
         isFragmentOpen = true;
+        getSupportFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit();
+    }
+
+    private void abrirFragmentComTipoPonto(String tipoPonto) {
+        RegistroPontoFragment fragment = new RegistroPontoFragment();
+
+        Bundle args = new Bundle();
+        args.putString("tipo_ponto", tipoPonto);
+        fragment.setArguments(args);
+
+        exibirComponentes(false); // Esconde os componentes
+        isFragmentOpen = true;
+
         getSupportFragmentManager()
                 .beginTransaction()
                 .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)

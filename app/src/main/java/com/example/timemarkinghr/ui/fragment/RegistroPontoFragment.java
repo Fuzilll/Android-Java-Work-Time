@@ -53,6 +53,7 @@ public class RegistroPontoFragment extends Fragment {
     private RegistroPontoController registroPontoController;
     private Usuario usuario;
     private boolean localizacaoDisponivel = false;
+    private String tipoPonto;
 
     // Launchers para solicitação de permissões e atividades
     private final ActivityResultLauncher<Intent> cameraLauncher =
@@ -107,6 +108,16 @@ public class RegistroPontoFragment extends Fragment {
 
         btnCapturarFoto.setOnClickListener(v -> verificarPermissaoCamera());
         btnRegistrarPonto.setOnClickListener(v -> registrarPonto());
+
+        if (getArguments() != null) {
+            tipoPonto = getArguments().getString("tipo_ponto");
+        }
+
+        // Exemplo: Exibir o tipo para depuração
+        Log.d("RegistroPontoFragment", "Tipo de ponto recebido: " + tipoPonto);
+
+        // Se quiser limpar após uso (não necessário geralmente, mas pode forçar null)
+        getArguments().remove("tipo_ponto");
 
         verificarPermissaoLocalizacao();
         return view;
@@ -265,8 +276,9 @@ public class RegistroPontoFragment extends Fragment {
             }
         });
     }
+
     private String determinarTipoRegistro() {
-        return "Entrada"; // Temporário
+        return tipoPonto != null ? tipoPonto : "Entrada";
     }
 
     private String converterBitmapParaBase64(Bitmap bitmap) {
@@ -280,6 +292,7 @@ public class RegistroPontoFragment extends Fragment {
         fotoBitmap = null;
         imgFoto.setImageResource(R.drawable.baseline_photo_camera_24);
         btnRegistrarPonto.setEnabled(false);
+        tipoPonto = "";
         localizacaoDisponivel = false;
     }
 }
