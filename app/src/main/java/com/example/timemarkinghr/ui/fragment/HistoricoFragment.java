@@ -13,12 +13,14 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.timemarkinghr.R;
+import com.example.timemarkinghr.data.model.Usuario;
 import com.example.timemarkinghr.ui.adapter.HistoricoPontoAdapter;
 import com.example.timemarkinghr.data.model.RegistroPonto;
 import com.example.timemarkinghr.data.remote.ApiService;
 import com.example.timemarkinghr.utils.SessaoManager;
 import com.example.timemarkinghr.data.remote.RemoteRepository;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,18 +84,19 @@ public class HistoricoFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_historico, container, false);
 
         recyclerViewHistorico = view.findViewById(R.id.recyclerViewHistorico);
         recyclerViewHistorico.setLayoutManager(new LinearLayoutManager(getContext()));
 
-  //      userId = SessaoManager.obterIdUsuario(requireContext());
-        if (userId == -1) {
-            Toast.makeText(getContext(), "Erro: Usuário não encontrado.", Toast.LENGTH_SHORT).show();
+        // Obter userId do usuário logado
+        Usuario usuario = SessaoManager.getUsuario(requireContext());
+        if (usuario == null) {
+            Toast.makeText(getContext(), "Sessão expirada. Faça login novamente.", Toast.LENGTH_SHORT).show();
             requireActivity().finish();
             return view;
         }
+        userId = usuario.getId();
 
         apiService = RemoteRepository.getApiService();
         if (apiService == null) {
@@ -111,28 +114,42 @@ public class HistoricoFragment extends Fragment {
     }
 
     private void carregarDados() {
-//        Log.d("HistoricoFragment", "Carregando registros para userId: " + userId);
-//
-//        Call<List<RegistroPonto>> call = apiService.buscarRegistrosPorUsuario(userId);
-//        call.enqueue(new Callback<List<RegistroPonto>>() {
-//            @Override
-//            public void onResponse(Call<List<RegistroPonto>> call, Response<List<RegistroPonto>> response) {
-//                if (response.isSuccessful() && response.body() != null) {
-//                    listaPontos.clear();
-//                    listaPontos.addAll(response.body());
-//                    adapter.notifyDataSetChanged();
-//                    Log.d("HistoricoFragment", "Registros carregados: " + listaPontos.size());
-//                } else {
-//                    Toast.makeText(getContext(), "Nenhum registro encontrado", Toast.LENGTH_SHORT).show();
-//                    Log.e("HistoricoFragment", "Erro na resposta: " + response.message());
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<List<RegistroPonto>> call, Throwable t) {
-//                Toast.makeText(getContext(), "Erro ao buscar registros: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-//                Log.e("HistoricoFragment", "Falha ao carregar registros", t);
-//            }
-//        });
+        String token = SessaoManager.getToken(requireContext());
+        if (token == null) {
+            Toast.makeText(getContext(), "Sessão expirada. Faça login novamente.", Toast.LENGTH_SHORT).show();
+            requireActivity().finish();
+            return;
+        }
+
+        Call<List<RegistroPonto>> call = apiService.listarPontosAndroid(
+                "Bearer " + token,
+                null,  // dataInicio (opcional)
+                null   // dataFim (opcional)
+        );
+
+        call.enqueue(new Callback<List<RegistroPonto>>() {
+            @Override
+            public void onResponse(Call<List<RegistroPonto>> call, Response<List<RegistroPonto>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    listaPontos.clear();
+                    listaPontos.addAll(response.body());
+                    adapter.notifyDataSetChanged();
+                    Log.d("HistoricoFragment", "Registros carregados: " + listaPontos.size());
+                } else {
+                    Toast.makeText(getContext(), "Erro: " + response.code(), Toast.LENGTH_SHORT).show();
+                    try {
+                        Log.e("API Error", "Error body: " + response.errorBody().string());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<RegistroPonto>> call, Throwable t) {
+                Toast.makeText(getContext(), "Falha na conexão", Toast.LENGTH_SHORT).show();
+                Log.e("API Failure", t.getMessage(), t);
+            }
+        });
     }
 }

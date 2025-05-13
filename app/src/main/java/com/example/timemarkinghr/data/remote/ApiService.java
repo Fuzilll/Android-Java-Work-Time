@@ -14,6 +14,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface ApiService {
     // Rotas de Autenticação
@@ -40,5 +41,11 @@ public interface ApiService {
     Call<List<RegistroPonto>> buscarRegistrosPorUsuario(
             @Header("Authorization") String token,
             @Path("userId") int userId
+    );
+    @GET("android/pontos")
+    Call<List<RegistroPonto>> listarPontosAndroid(
+            @Header("Authorization") String token,
+            @Query("dataInicio") String dataInicio,
+            @Query("dataFim") String dataFim
     );
 }
