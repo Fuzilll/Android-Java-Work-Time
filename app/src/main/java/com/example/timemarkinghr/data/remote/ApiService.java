@@ -42,10 +42,14 @@ public interface ApiService {
             @Header("Authorization") String token,
             @Path("userId") int userId
     );
-    @GET("android/pontos")
-    Call<List<RegistroPonto>> listarPontosAndroid(
+
+    @GET("registros/meus-registros")
+    Call<List<RegistroPonto>> listarMeusRegistros(
             @Header("Authorization") String token,
             @Query("dataInicio") String dataInicio,
             @Query("dataFim") String dataFim
     );
+
+
+
 }

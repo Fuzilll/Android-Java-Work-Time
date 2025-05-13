@@ -121,10 +121,10 @@ public class HistoricoFragment extends Fragment {
             return;
         }
 
-        Call<List<RegistroPonto>> call = apiService.listarPontosAndroid(
+        Call<List<RegistroPonto>> call = apiService.listarMeusRegistros(
                 "Bearer " + token,
-                null,  // dataInicio (opcional)
-                null   // dataFim (opcional)
+                "2024-01-01",   // dataInicio
+                "2025-12-31"    // dataFim
         );
 
         call.enqueue(new Callback<List<RegistroPonto>>() {
