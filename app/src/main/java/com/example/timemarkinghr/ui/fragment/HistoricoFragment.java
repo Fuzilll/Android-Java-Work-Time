@@ -114,41 +114,57 @@ public class HistoricoFragment extends Fragment {
     }
 
     private void carregarDados() {
+        Log.d("carregarDados", "Iniciando carregamento dos dados");
+
         String token = SessaoManager.getToken(requireContext());
+
         if (token == null) {
+            Log.w("carregarDados", "Token não encontrado ou sessão expirada");
             Toast.makeText(getContext(), "Sessão expirada. Faça login novamente.", Toast.LENGTH_SHORT).show();
             requireActivity().finish();
             return;
         }
 
+        Log.d("carregarDados", "Token recuperado com sucesso");
+
+        String dataInicio = "2024-01-01 00:00:00";  // Início do intervalo
+        String dataFim = "2025-12-31 23:59:59";    // Fim do intervalo, incluindo o final do dia
+        Log.d("carregarDados", "Parâmetros: dataInicio = " + dataInicio + ", dataFim = " + dataFim + ", userId = " + userId);
+
         Call<List<RegistroPonto>> call = apiService.listarMeusRegistros(
                 "Bearer " + token,
-                "2024-01-01",   // dataInicio
-                "2025-12-31"    // dataFim
+                dataInicio,
+                dataFim,
+                userId
         );
+
+        Log.d("carregarDados", "Chamada à API criada, enviando requisição...");
 
         call.enqueue(new Callback<List<RegistroPonto>>() {
             @Override
             public void onResponse(Call<List<RegistroPonto>> call, Response<List<RegistroPonto>> response) {
+                Log.d("carregarDados", "Resposta recebida da API: code = " + response.code());
+
                 if (response.isSuccessful() && response.body() != null) {
                     listaPontos.clear();
                     listaPontos.addAll(response.body());
                     adapter.notifyDataSetChanged();
-                    Log.d("HistoricoFragment", "Registros carregados: " + listaPontos.size());
+                    Log.d("carregarDados", "Registros carregados com sucesso: total = " + listaPontos.size());
                 } else {
-                    Toast.makeText(getContext(), "Erro: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Erro ao carregar dados: " + response.code(), Toast.LENGTH_SHORT).show();
                     try {
-                        Log.e("API Error", "Error body: " + response.errorBody().string());
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "sem corpo de erro";
+                        Log.e("carregarDados", "Erro na resposta da API: " + errorBody);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Log.e("carregarDados", "Erro ao ler corpo de erro", e);
                     }
                 }
             }
 
             @Override
             public void onFailure(Call<List<RegistroPonto>> call, Throwable t) {
-                Toast.makeText(getContext(), "Falha na conexão", Toast.LENGTH_SHORT).show();
-                Log.e("API Failure", t.getMessage(), t);
+                Toast.makeText(getContext(), "Falha na conexão com o servidor", Toast.LENGTH_SHORT).show();
+                Log.e("carregarDados", "Falha na requisição à API", t);
             }
         });
     }

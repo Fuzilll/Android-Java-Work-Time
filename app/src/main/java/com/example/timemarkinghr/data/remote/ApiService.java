@@ -43,12 +43,14 @@ public interface ApiService {
             @Path("userId") int userId
     );
 
-    @GET("registros/meus-registros")
+    @GET("registros/historico-pontos-android")
     Call<List<RegistroPonto>> listarMeusRegistros(
             @Header("Authorization") String token,
             @Query("dataInicio") String dataInicio,
-            @Query("dataFim") String dataFim
+            @Query("dataFim") String dataFim,
+            @Query("idUsuario") int idUsuario
     );
+
 
 
 

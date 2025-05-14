@@ -8,7 +8,7 @@ import com.google.gson.Gson;
 
 public class SessaoManager {
     private static final String PREF_NAME = "SessaoUsuario";
-    private static final String KEY_TOKEN = "token";
+    private static final String KEY_TOKEN = "authToken";
     private static final String KEY_USUARIO = "usuario";
     private static final String KEY_ID = "idUsuario";
     private static final String KEY_NIVEL = "nivelUsuario";
