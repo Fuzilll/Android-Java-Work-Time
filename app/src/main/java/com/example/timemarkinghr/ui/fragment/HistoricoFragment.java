@@ -127,14 +127,14 @@ public class HistoricoFragment extends Fragment {
 
         Log.d("carregarDados", "Token recuperado com sucesso");
 
-        String dataInicio = "2024-01-01 00:00:00";  // Início do intervalo
-        String dataFim = "2025-12-31 23:59:59";    // Fim do intervalo, incluindo o final do dia
-        Log.d("carregarDados", "Parâmetros: dataInicio = " + dataInicio + ", dataFim = " + dataFim + ", userId = " + userId);
+//        String dataInicio = "2024-01-01 00:00:00";  // Início do intervalo
+//        String dataFim = "2025-12-31 23:59:59";    // Fim do intervalo, incluindo o final do dia
+//        Log.d("carregarDados", "Parâmetros: dataInicio = " + dataInicio + ", dataFim = " + dataFim + ", userId = " + userId);
 
         Call<List<RegistroPonto>> call = apiService.listarMeusRegistros(
                 "Bearer " + token,
-                dataInicio,
-                dataFim,
+//                dataInicio,
+//                dataFim,
                 userId
         );
 

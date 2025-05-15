@@ -46,8 +46,8 @@ public interface ApiService {
     @GET("registros/historico-pontos-android")
     Call<List<RegistroPonto>> listarMeusRegistros(
             @Header("Authorization") String token,
-            @Query("dataInicio") String dataInicio,
-            @Query("dataFim") String dataFim,
+//            @Query("dataInicio") String dataInicio,
+//            @Query("dataFim") String dataFim,
             @Query("idUsuario") int idUsuario
     );
 
