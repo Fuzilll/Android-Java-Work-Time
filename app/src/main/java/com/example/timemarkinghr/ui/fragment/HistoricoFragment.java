@@ -1,5 +1,8 @@
 package com.example.timemarkinghr.ui.fragment;
 
+import android.app.DatePickerDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -10,6 +13,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.timemarkinghr.R;
@@ -22,64 +27,21 @@ import com.example.timemarkinghr.data.remote.RemoteRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link HistoricoFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class HistoricoFragment extends Fragment {
+
     private RecyclerView recyclerViewHistorico;
     private HistoricoPontoAdapter adapter;
     private List<RegistroPonto> listaPontos = new ArrayList<>();
     private int userId;
     private ApiService apiService;
-
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public HistoricoFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment HistoricoFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static HistoricoFragment newInstance(String param1, String param2) {
-        HistoricoFragment fragment = new HistoricoFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
+    private AutoCompleteTextView editTextFiltroMes;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -88,8 +50,18 @@ public class HistoricoFragment extends Fragment {
 
         recyclerViewHistorico = view.findViewById(R.id.recyclerViewHistorico);
         recyclerViewHistorico.setLayoutManager(new LinearLayoutManager(getContext()));
+        adapter = new HistoricoPontoAdapter(listaPontos);
+        recyclerViewHistorico.setAdapter(adapter);
 
-        // Obter userId do usuário logado
+        // Campo de filtro mês/ano
+        editTextFiltroMes = view.findViewById(R.id.tvSelecionarMesAno);
+        SharedPreferences prefs = requireContext().getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
+        int mesSalvo = prefs.getInt("mesSelecionado", Calendar.getInstance().get(Calendar.MONTH));
+        int anoSalvo = prefs.getInt("anoSelecionado", Calendar.getInstance().get(Calendar.YEAR));
+        editTextFiltroMes.setText(String.format("%02d/%d", mesSalvo + 1, anoSalvo));
+
+        editTextFiltroMes.setOnClickListener(v -> exibirDialogoAnoMes());
+
         Usuario usuario = SessaoManager.getUsuario(requireContext());
         if (usuario == null) {
             Toast.makeText(getContext(), "Sessão expirada. Faça login novamente.", Toast.LENGTH_SHORT).show();
@@ -105,13 +77,37 @@ public class HistoricoFragment extends Fragment {
             return view;
         }
 
-        adapter = new HistoricoPontoAdapter(listaPontos);
-        recyclerViewHistorico.setAdapter(adapter);
-
         carregarDados();
-
         return view;
     }
+
+    private void exibirDialogoAnoMes() {
+        final Calendar hoje = Calendar.getInstance();
+
+        DatePickerDialog dialog = new DatePickerDialog(requireContext(),
+                (view, year, month, dayOfMonth) -> {
+                    // Formata a data para exibição: MM/YYYY
+                    String mesAnoFormatado = String.format("%02d/%d", month + 1, year);
+                    editTextFiltroMes.setText(mesAnoFormatado);
+
+                    // Salva mês e ano
+                    SharedPreferences.Editor editor = requireContext()
+                            .getSharedPreferences("AppPrefs", Context.MODE_PRIVATE).edit();
+                    editor.putInt("mesSelecionado", month);
+                    editor.putInt("anoSelecionado", year);
+                    editor.apply();
+
+                    Log.d("FiltroMes", "Mês/Ano selecionado: " + mesAnoFormatado);
+
+                    // Aqui você pode aplicar o filtro com base no ano/mês
+                    carregarDados(); // ou filtrarPorMesAno(year, month)
+                },
+                hoje.get(Calendar.YEAR), hoje.get(Calendar.MONTH), hoje.get(Calendar.DAY_OF_MONTH));
+
+        dialog.setTitle("Selecione mês e ano");
+        dialog.show();
+    }
+
 
     private void carregarDados() {
         Log.d("carregarDados", "Iniciando carregamento dos dados");
@@ -125,31 +121,18 @@ public class HistoricoFragment extends Fragment {
             return;
         }
 
-        Log.d("carregarDados", "Token recuperado com sucesso");
-
-//        String dataInicio = "2024-01-01 00:00:00";  // Início do intervalo
-//        String dataFim = "2025-12-31 23:59:59";    // Fim do intervalo, incluindo o final do dia
-//        Log.d("carregarDados", "Parâmetros: dataInicio = " + dataInicio + ", dataFim = " + dataFim + ", userId = " + userId);
-
         Call<List<RegistroPonto>> call = apiService.listarMeusRegistros(
                 "Bearer " + token,
-//                dataInicio,
-//                dataFim,
                 userId
         );
-
-        Log.d("carregarDados", "Chamada à API criada, enviando requisição...");
 
         call.enqueue(new Callback<List<RegistroPonto>>() {
             @Override
             public void onResponse(Call<List<RegistroPonto>> call, Response<List<RegistroPonto>> response) {
-                Log.d("carregarDados", "Resposta recebida da API: code = " + response.code());
-
                 if (response.isSuccessful() && response.body() != null) {
                     listaPontos.clear();
                     listaPontos.addAll(response.body());
                     adapter.notifyDataSetChanged();
-                    Log.d("carregarDados", "Registros carregados com sucesso: total = " + listaPontos.size());
                 } else {
                     Toast.makeText(getContext(), "Erro ao carregar dados: " + response.code(), Toast.LENGTH_SHORT).show();
                     try {
