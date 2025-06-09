@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.timemarkinghr.R;
 
@@ -15,8 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 
 import com.example.timemarkinghr.data.model.RegistroPonto;
-import com.example.timemarkinghr.ui.activity.RegistroPontoActivity;
-import com.example.timemarkinghr.utils.DateUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

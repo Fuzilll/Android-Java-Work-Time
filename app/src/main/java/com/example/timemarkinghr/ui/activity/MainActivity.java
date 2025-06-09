@@ -121,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
                 } else if (itemId == R.id.nav_perfil) {
                     abrirFragment(new PerfilFragment());
                 } else if (itemId == R.id.nav_configuracoes) {
-                    abrirTela(ConfiguracoesActivity.class, "Configurações");
                 } else if (itemId == R.id.nav_historico) {
                     abrirFragment(new HistoricoFragment());
                 } else if (itemId == R.id.nav_sair) {
