@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
@@ -22,6 +23,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import com.example.timemarkinghr.R;
@@ -38,6 +40,8 @@ import com.google.android.gms.location.Priority;
 import com.google.android.gms.tasks.Task;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -54,14 +58,25 @@ public class RegistroPontoFragment extends Fragment {
     private Usuario usuario;
     private boolean localizacaoDisponivel = false;
     private String tipoPonto;
+    private Uri fotoUriTemporaria;
 
-    // Launchers para solicitação de permissões e atividades
+
     private final ActivityResultLauncher<Intent> cameraLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == requireActivity().RESULT_OK && result.getData() != null) {
-                    fotoBitmap = (Bitmap) result.getData().getExtras().get("data");
-                    imgFoto.setImageBitmap(fotoBitmap);
-                    btnRegistrarPonto.setEnabled(true);
+                if (result.getResultCode() == requireActivity().RESULT_OK) {
+                    try {
+                        fotoBitmap = MediaStore.Images.Media.getBitmap(
+                                requireContext().getContentResolver(),
+                                fotoUriTemporaria
+                        );
+                        imgFoto.setImageBitmap(fotoBitmap);
+                        btnRegistrarPonto.setEnabled(true);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Toast.makeText(requireContext(), "Erro ao carregar a imagem", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "Captura cancelada ou falhou", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -187,13 +202,33 @@ public class RegistroPontoFragment extends Fragment {
     }
 
     private void abrirCamera() {
+        File fotoArquivo;
+        try {
+            String nomeArquivo = "foto_ponto_" + System.currentTimeMillis();
+            fotoArquivo = File.createTempFile(nomeArquivo, ".jpg", requireContext().getCacheDir());
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(requireContext(), "Erro ao criar arquivo temporário", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        fotoUriTemporaria = FileProvider.getUriForFile(
+                requireContext(),
+                requireContext().getPackageName() + ".provider",
+                fotoArquivo
+        );
+
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (intent.resolveActivity(requireActivity().getPackageManager()) != null) {
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, fotoUriTemporaria);
+        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+        if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
             cameraLauncher.launch(intent);
         } else {
             Toast.makeText(requireContext(), "Nenhum app de câmera encontrado", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     private void registrarPonto() {
         // Verificar se a foto foi tirada

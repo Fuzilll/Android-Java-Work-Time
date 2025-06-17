@@ -43,10 +43,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activity.HistoricoActivity" android:exported="false" />
-        <activity android:name=".ui.activity.ConfiguracoesActivity" android:exported="false" />
         <activity android:name=".ui.activity.LoginActivity" android:exported="false" />
-        <activity android:name=".ui.activity.RegistroPontoActivity" android:exported="false" />
         <activity android:name=".ui.activity.MainActivity" android:exported="false" />
     </application>
 </manifest>
